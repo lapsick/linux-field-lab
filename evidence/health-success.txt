@@ -1,0 +1,3 @@
+$ ./scripts/health.sh "evidence/test reports"
+Report: evidence/test reports/report-20261021-143027-42597.txt
+0

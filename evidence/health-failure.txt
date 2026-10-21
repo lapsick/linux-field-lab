@@ -1,0 +1,4 @@
+$ ./scripts/health.sh /proc/field-lab-no-write
+mkdir: No such file or directory
+Cannot create output directory: /proc/field-lab-no-write (mkdir exit 1)
+1
