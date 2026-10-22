@@ -1,0 +1,85 @@
+
+$ sudo ip -n fl-a -br addr
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+fa@if3           UP             10.77.1.2/24 fe80::2022:e9ff:fe6d:a310/64 
+exit=0
+
+$ sudo ip -n fl-b -br addr
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+fb@if5           UP             10.77.2.2/24 fe80::9410:fdff:fe7d:3e7d/64 
+exit=0
+
+$ sudo ip -n fl-c -br addr
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+fc0@if7          UP             10.77.3.2/24 fe80::50b2:3aff:fe17:2df3/64 
+exit=0
+
+$ sudo ip -n fl-r -br addr
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+fr0@if4          UP             10.77.1.1/24 fe80::3c33:feff:feea:39b3/64 
+fr1@if6          UP             10.77.2.1/24 fe80::fc6a:8eff:fef6:99ba/64 
+frc@if8          UP             10.77.3.1/24 fe80::a888:f3ff:fe11:bcdf/64 
+exit=0
+
+$ sudo ip -n fl-r route show
+10.77.1.0/24 dev fr0 proto kernel scope link src 10.77.1.1 
+10.77.2.0/24 dev fr1 proto kernel scope link src 10.77.2.1 
+10.77.3.0/24 dev frc proto kernel scope link src 10.77.3.1 
+exit=0
+
+$ sudo ip -n fl-c route show
+10.77.1.0/24 via 10.77.3.1 dev fc0 
+10.77.2.0/24 via 10.77.3.1 dev fc0 
+10.77.3.0/24 dev fc0 proto kernel scope link src 10.77.3.2 
+exit=0
+
+$ sudo ip -n fl-a route get 10.77.2.2
+10.77.2.2 via 10.77.1.1 dev fa src 10.77.1.2 uid 0 
+    cache 
+exit=0
+
+$ sudo ip netns exec fl-a ping -n -c 4 -W 2 10.77.2.2
+PING 10.77.2.2 (10.77.2.2) 56(84) bytes of data.
+64 bytes from 10.77.2.2: icmp_seq=1 ttl=63 time=0.132 ms
+64 bytes from 10.77.2.2: icmp_seq=2 ttl=63 time=0.036 ms
+64 bytes from 10.77.2.2: icmp_seq=3 ttl=63 time=0.055 ms
+64 bytes from 10.77.2.2: icmp_seq=4 ttl=63 time=0.039 ms
+
+--- 10.77.2.2 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3057ms
+rtt min/avg/max/mdev = 0.036/0.065/0.132/0.039 ms
+exit=0
+
+$ sudo ip -n fl-a route get 10.77.3.2
+10.77.3.2 via 10.77.1.1 dev fa src 10.77.1.2 uid 0 
+    cache 
+exit=0
+
+$ sudo ip netns exec fl-a ping -n -c 4 -W 2 10.77.3.2
+PING 10.77.3.2 (10.77.3.2) 56(84) bytes of data.
+64 bytes from 10.77.3.2: icmp_seq=1 ttl=63 time=0.413 ms
+64 bytes from 10.77.3.2: icmp_seq=2 ttl=63 time=0.132 ms
+64 bytes from 10.77.3.2: icmp_seq=3 ttl=63 time=0.068 ms
+64 bytes from 10.77.3.2: icmp_seq=4 ttl=63 time=0.044 ms
+
+--- 10.77.3.2 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3069ms
+rtt min/avg/max/mdev = 0.044/0.164/0.413/0.147 ms
+exit=0
+
+$ sudo ip -n fl-b route get 10.77.3.2
+10.77.3.2 via 10.77.2.1 dev fb src 10.77.2.2 uid 0 
+    cache 
+exit=0
+
+$ sudo ip netns exec fl-b ping -n -c 4 -W 2 10.77.3.2
+PING 10.77.3.2 (10.77.3.2) 56(84) bytes of data.
+64 bytes from 10.77.3.2: icmp_seq=1 ttl=63 time=0.211 ms
+64 bytes from 10.77.3.2: icmp_seq=2 ttl=63 time=0.034 ms
+64 bytes from 10.77.3.2: icmp_seq=3 ttl=63 time=0.026 ms
+64 bytes from 10.77.3.2: icmp_seq=4 ttl=63 time=0.129 ms
+
+--- 10.77.3.2 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3076ms
+rtt min/avg/max/mdev = 0.026/0.100/0.211/0.075 ms
+exit=0
